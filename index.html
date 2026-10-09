@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YacharCAD - 2D - versión 2.0 pro</title>
+    <title>GeoPoly Pro - Medición y Escalado</title>
     <style>
         :root {
             --bg-primary: #0a0e1a;
@@ -114,7 +114,6 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-            align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 10px;
@@ -135,29 +134,6 @@
             background: var(--accent-4);
             color: #0a0e1a;
             box-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
-        }
-
-        .toolbar label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-left: 4px;
-        }
-
-        .toolbar select {
-            padding: 5px 8px;
-            background: var(--bg-input);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .toolbar select:focus {
-            outline: none;
-            border-color: var(--accent-1);
-            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
         }
 
         /* Sidebar */
@@ -437,9 +413,9 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🛰️ YacharCAD - 2D</h1>
+            <h1>🛰️ GeoPoly Pro</h1>
             <div class="header-controls">
-                <span class="badge">v4.1 - Grosor configurable</span>
+                <span class="badge">v4.0 - Medición de Distancias</span>
                 <button class="btn btn-secondary btn-sm" onclick="resetAll()">🔄 Reset</button>
             </div>
         </div>
@@ -457,27 +433,6 @@
                     <button class="btn btn-warning btn-sm" id="measureMode" onclick="setMode('measure')">📏 Medir</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteSelected()">🗑️ Eliminar</button>
                     <button class="btn btn-success btn-sm" onclick="closePolygon()">🔒 Cerrar</button>
-
-                    <!-- Controles de estilo -->
-                    <label for="lineWidth">Línea:</label>
-                    <select id="lineWidth" title="Grosor de la línea">
-                        <option value="1">1 px</option>
-                        <option value="2" selected>2 px</option>
-                        <option value="3">3 px</option>
-                        <option value="4">4 px</option>
-                        <option value="6">6 px</option>
-                        <option value="8">8 px</option>
-                    </select>
-
-                    <label for="pointSize">Punto:</label>
-                    <select id="pointSize" title="Tamaño del punto">
-                        <option value="3">3 px</option>
-                        <option value="5" selected>5 px</option>
-                        <option value="7">7 px</option>
-                        <option value="10">10 px</option>
-                        <option value="14">14 px</option>
-                    </select>
-
                     <span style="flex:1"></span>
                     <span style="font-size:12px; color:var(--text-muted);" id="vertexCount">Vértices: 0</span>
                 </div>
@@ -634,10 +589,7 @@
             // Medición
             measurePoints: [],
             measureDistance: 0,
-            isMeasuring: false,
-            // Estilo configurable
-            lineWidth: 2,
-            pointSize: 5
+            isMeasuring: false
         };
 
         // ============ DOM REFS ============
@@ -649,19 +601,8 @@
         function init() {
             canvas.width = state.canvasWidth;
             canvas.height = state.canvasHeight;
-            const opts = getStyleOptions();
-            state.lineWidth = opts.lineWidth;
-            state.pointSize = opts.pointSize;
             draw();
             updateUI();
-        }
-
-        // ============ ESTILO ============
-        function getStyleOptions() {
-            return {
-                lineWidth: parseFloat(document.getElementById('lineWidth').value) || 2,
-                pointSize: parseFloat(document.getElementById('pointSize').value) || 5
-            };
         }
 
         // ============ CARGA DE IMÁGENES ============
@@ -730,7 +671,7 @@
                     ctx.lineTo(state.measurePoints[i].x, state.measurePoints[i].y);
                 }
                 ctx.strokeStyle = '#ffd93d';
-                ctx.lineWidth = state.lineWidth;
+                ctx.lineWidth = 3;
                 ctx.setLineDash([8, 4]);
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -738,7 +679,7 @@
                 // Puntos de medición
                 state.measurePoints.forEach((p, i) => {
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, state.pointSize, 0, 2 * Math.PI);
+                    ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ffd93d';
                     ctx.fill();
                     ctx.strokeStyle = '#ffd93d';
@@ -797,18 +738,17 @@
                     ctx.fillStyle = 'rgba(100, 255, 218, 0.1)';
                     ctx.fill();
                     ctx.strokeStyle = '#64ffda';
-                    ctx.lineWidth = state.lineWidth;
+                    ctx.lineWidth = 2;
                     ctx.stroke();
                 } else {
                     ctx.strokeStyle = 'rgba(100, 255, 218, 0.6)';
-                    ctx.lineWidth = state.lineWidth;
+                    ctx.lineWidth = 2;
                     ctx.stroke();
                 }
 
                 state.points.forEach((p, i) => {
                     const isSelected = (i === state.selectedIndex && state.mode === 'edit');
-                    const baseSize = state.pointSize;
-                    const radius = isSelected ? baseSize + 3 : baseSize;
+                    const radius = isSelected ? 8 : 5;
                     
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
@@ -833,7 +773,7 @@
                 const centroid = calculateCentroid(state.points);
                 if (centroid) {
                     ctx.beginPath();
-                    ctx.arc(centroid.x, centroid.y, state.pointSize, 0, 2 * Math.PI);
+                    ctx.arc(centroid.x, centroid.y, 6, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ff6b6b';
                     ctx.fill();
                     ctx.strokeStyle = '#ff6b6b';
@@ -1207,8 +1147,6 @@
                 isClosed: state.isClosed,
                 scale: state.scale,
                 scaleUnit: document.getElementById('scaleUnit').value,
-                lineWidth: state.lineWidth,
-                pointSize: state.pointSize,
                 timestamp: new Date().toISOString()
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
@@ -1240,14 +1178,6 @@
                         document.getElementById('scaleFactor').value = state.scale;
                         if (data.scaleUnit) {
                             document.getElementById('scaleUnit').value = data.scaleUnit;
-                        }
-                        if (data.lineWidth) {
-                            state.lineWidth = data.lineWidth;
-                            document.getElementById('lineWidth').value = data.lineWidth;
-                        }
-                        if (data.pointSize) {
-                            state.pointSize = data.pointSize;
-                            document.getElementById('pointSize').value = data.pointSize;
                         }
                         draw();
                         updateUI();
@@ -1286,19 +1216,6 @@
 
         document.getElementById('scaleFactor').addEventListener('change', applyScale);
         document.getElementById('scaleUnit').addEventListener('change', applyScale);
-
-        // Controles de estilo
-        document.getElementById('lineWidth').addEventListener('change', () => {
-            const opts = getStyleOptions();
-            state.lineWidth = opts.lineWidth;
-            draw();
-        });
-
-        document.getElementById('pointSize').addEventListener('change', () => {
-            const opts = getStyleOptions();
-            state.pointSize = opts.pointSize;
-            draw();
-        });
     </script>
 </body>
 </html>
