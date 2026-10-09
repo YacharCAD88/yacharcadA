@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YacharCAD - 2D - versión 2.0 pro</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141b2d;
+            --bg-card: #1a233a;
+            --bg-input: #0f1629;
+            --text-primary: #e8edf5;
+            --text-secondary: #8892b0;
+            --text-muted: #5a6a8a;
+            --border-color: #2a3a5a;
+            --accent-1: #64ffda;
+            --accent-2: #7c4dff;
+            --accent-3: #ff6b6b;
+            --accent-4: #ffd93d;
+            --accent-5: #4ecdc4;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Canvas Container */
+        .canvas-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            position: relative;
+            min-height: 600px;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        #canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: var(--bg-primary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .toolbar .btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .toolbar .btn.active {
+            background: var(--accent-1);
+            color: #0a0e1a;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .toolbar .btn.measure-active {
+            background: var(--accent-4);
+            color: #0a0e1a;
+            box-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
+        }
+
+        .toolbar label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .toolbar select {
+            padding: 5px 8px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toolbar select:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--accent-1);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form controls */
+        .form-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        .form-group input,
+        .form-group select {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: var(--transition);
+            min-width: 50px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+        }
+
+        .form-group input[type="file"] {
+            padding: 6px;
+            background: transparent;
+            border: none;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), #00b894);
+            color: #0a0e1a;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-2), #5a2d9e);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-3), #c0392b);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--accent-4), #f39c12);
+            color: #0a0e1a;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00a86b);
+            color: #0a0e1a;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--accent-5), #45b7d1);
+            color: #0a0e1a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 60px;
+        }
+
+        /* Results */
+        .result-box {
+            background: rgba(100, 255, 218, 0.05);
+            border: 1px solid var(--accent-1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .result-box.measure-box {
+            border-color: var(--accent-4);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item .label {
+            color: var(--text-secondary);
+        }
+
+        .result-item .value {
+            color: var(--accent-1);
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-item .value.warning {
+            color: var(--accent-4);
+        }
+
+        .result-item .value.measure {
+            color: var(--accent-4);
+        }
+
+        /* Status */
+        .status-bar {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 8px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-1);
+            padding: 15px 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            color: var(--text-primary);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-color: var(--accent-1);
+        }
+
+        .toast.error {
+            border-color: var(--accent-3);
+        }
+
+        .toast.info {
+            border-color: var(--accent-5);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(100, 255, 218, 0.15);
+            color: var(--accent-1);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 20px; }
+            .card { padding: 12px; }
+            .btn { font-size: 11px; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛰️ YacharCAD - 2D</h1>
+            <div class="header-controls">
+                <span class="badge">v4.1 - Grosor configurable</span>
+                <button class="btn btn-secondary btn-sm" onclick="resetAll()">🔄 Reset</button>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Canvas -->
+            <div class="canvas-wrapper">
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="canvas" width="1200" height="800"></canvas>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-primary btn-sm active" id="drawMode" onclick="setMode('draw')">✏️ Dibujar</button>
+                    <button class="btn btn-secondary btn-sm" id="editMode" onclick="setMode('edit')">✋ Editar</button>
+                    <button class="btn btn-warning btn-sm" id="measureMode" onclick="setMode('measure')">📏 Medir</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteSelected()">🗑️ Eliminar</button>
+                    <button class="btn btn-success btn-sm" onclick="closePolygon()">🔒 Cerrar</button>
+
+                    <!-- Controles de estilo -->
+                    <label for="lineWidth">Línea:</label>
+                    <select id="lineWidth" title="Grosor de la línea">
+                        <option value="1">1 px</option>
+                        <option value="2" selected>2 px</option>
+                        <option value="3">3 px</option>
+                        <option value="4">4 px</option>
+                        <option value="6">6 px</option>
+                        <option value="8">8 px</option>
+                    </select>
+
+                    <label for="pointSize">Punto:</label>
+                    <select id="pointSize" title="Tamaño del punto">
+                        <option value="3">3 px</option>
+                        <option value="5" selected>5 px</option>
+                        <option value="7">7 px</option>
+                        <option value="10">10 px</option>
+                        <option value="14">14 px</option>
+                    </select>
+
+                    <span style="flex:1"></span>
+                    <span style="font-size:12px; color:var(--text-muted);" id="vertexCount">Vértices: 0</span>
+                </div>
+                <div class="status-bar">
+                    <span id="statusText">🔵 Modo Dibujo - Haz clic para añadir vértices</span>
+                    <span id="mouseCoords">(0, 0)</span>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Imagen -->
+                <div class="card">
+                    <div class="card-title">📷 Cargar Imagen</div>
+                    <input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)" style="width:100%;">
+                    <div class="form-group mt-10">
+                        <label>Escala (px/unidad):</label>
+                        <input type="number" id="scaleFactor" value="1" step="0.1" min="0.001">
+                        <select id="scaleUnit" style="flex:0 0 80px;">
+                            <option value="m">m</option>
+                            <option value="km">km</option>
+                            <option value="ft">ft</option>
+                            <option value="mi">mi</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="applyScale()" style="width:100%;">Aplicar Escala</button>
+                </div>
+
+                <!-- Medición de Distancias -->
+                <div class="card" style="border-color: var(--accent-4);">
+                    <div class="card-title" style="color: var(--accent-4);">📏 Medición de Distancias</div>
+                    <div class="form-group">
+                        <label>Distancia conocida:</label>
+                        <input type="number" id="knownDistance" value="10" step="0.1" min="0.1">
+                        <select id="knownUnit" style="flex:0 0 60px;">
+                            <option value="m">m</option>
+                            <option value="km">km</option>
+                            <option value="ft">ft</option>
+                            <option value="mi">mi</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-warning btn-sm" onclick="startMeasure()">📏 Medir distancia</button>
+                        <button class="btn btn-success btn-sm" onclick="setScaleFromMeasure()">⚖️ Calcular escala</button>
+                        <button class="btn btn-danger btn-sm" onclick="clearMeasure()">🗑️ Limpiar</button>
+                    </div>
+                    <div id="measureResult" class="result-box measure-box">
+                        <div class="result-item">
+                            <span class="label">Distancia en píxeles:</span>
+                            <span class="value measure" id="measurePx">0.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Distancia real:</span>
+                            <span class="value measure" id="measureReal">0.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Puntos:</span>
+                            <span class="value measure" id="measurePoints">0</span>
+                        </div>
+                        <div class="result-item" style="border-top: 1px solid var(--border-color); margin-top: 4px; padding-top: 8px;">
+                            <span class="label">Escala calculada:</span>
+                            <span class="value measure" id="calculatedScale">1 px = 1.00 m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información -->
+                <div class="card">
+                    <div class="card-title">📊 Datos del Polígono</div>
+                    <div id="polygonInfo">
+                        <div class="result-item">
+                            <span class="label">Vértices:</span>
+                            <span class="value" id="infoVertices">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Área (px²):</span>
+                            <span class="value" id="infoAreaPx">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Área (unidades²):</span>
+                            <span class="value warning" id="infoAreaUnits">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Perímetro (px):</span>
+                            <span class="value" id="infoPerimeter">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coordenadas -->
+                <div class="card">
+                    <div class="card-title">📍 Coordenadas</div>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary btn-sm" onclick="copyCoords()">📋 Copiar</button>
+                        <button class="btn btn-warning btn-sm" onclick="exportCoords()">💾 Exportar</button>
+                        <button class="btn btn-primary btn-sm" onclick="importCoords()">📂 Importar</button>
+                    </div>
+                    <div class="coord-list" id="coordList" style="max-height:150px; overflow-y:auto; margin-top:8px; font-size:12px; font-family: 'Courier New', monospace; background: var(--bg-input); padding:8px; border-radius:6px; border:1px solid var(--border-color);">
+                        <div style="color:var(--text-muted); text-align:center; padding:20px 0;">
+                            No hay vértices
+                        </div>
+                    </div>
+                    <input type="file" id="importFile" accept=".json,.txt" style="display:none;" onchange="handleImport(event)">
+                </div>
+
+                <!-- Resultados -->
+                <div class="card">
+                    <div class="card-title">📐 Cálculos</div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary btn-sm" onclick="calculateAll()">🧮 Calcular</button>
+                        <button class="btn btn-success btn-sm" onclick="calculateAreaOnly()">📏 Solo Área</button>
+                    </div>
+                    <div id="resultsBox" class="result-box show">
+                        <div class="result-item">
+                            <span class="label">Área (px²):</span>
+                            <span class="value" id="calcAreaPx">0.0000</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Área (unidades²):</span>
+                            <span class="value warning" id="calcAreaUnits">0.0000</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Perímetro (px):</span>
+                            <span class="value" id="calcPerimeter">0.0000</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Centroide (x, y):</span>
+                            <span class="value" id="calcCentroid">(0, 0)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============ ESTADO GLOBAL ============
+        const state = {
+            points: [],
+            isClosed: false,
+            mode: 'draw', // 'draw' | 'edit' | 'measure'
+            selectedIndex: -1,
+            image: null,
+            scale: 1,
+            scaleUnit: 'm',
+            isDragging: false,
+            dragIndex: -1,
+            dragOffset: { x: 0, y: 0 },
+            canvasWidth: 1200,
+            canvasHeight: 800,
+            // Medición
+            measurePoints: [],
+            measureDistance: 0,
+            isMeasuring: false,
+            // Estilo configurable
+            lineWidth: 2,
+            pointSize: 5
+        };
+
+        // ============ DOM REFS ============
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+
+        // ============ INICIALIZACIÓN ============
+        function init() {
+            canvas.width = state.canvasWidth;
+            canvas.height = state.canvasHeight;
+            const opts = getStyleOptions();
+            state.lineWidth = opts.lineWidth;
+            state.pointSize = opts.pointSize;
+            draw();
+            updateUI();
+        }
+
+        // ============ ESTILO ============
+        function getStyleOptions() {
+            return {
+                lineWidth: parseFloat(document.getElementById('lineWidth').value) || 2,
+                pointSize: parseFloat(document.getElementById('pointSize').value) || 5
+            };
+        }
+
+        // ============ CARGA DE IMÁGENES ============
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    state.image = img;
+                    const ratio = img.width / img.height;
+                    let width = Math.min(1200, img.width);
+                    let height = width / ratio;
+                    if (height > 800) {
+                        height = 800;
+                        width = height * ratio;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    state.canvasWidth = width;
+                    state.canvasHeight = height;
+                    draw();
+                    showToast('Imagen cargada correctamente', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============ DIBUJADO ============
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar imagen
+            if (state.image) {
+                ctx.drawImage(state.image, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#0a0e1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#1a233a';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < canvas.width; x += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = '#5a6a8a';
+                ctx.font = '14px Arial';
+                ctx.fillText('Carga una imagen aérea para comenzar', 20, 40);
+            }
+
+            // Dibujar mediciones
+            if (state.measurePoints.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(state.measurePoints[0].x, state.measurePoints[0].y);
+                for (let i = 1; i < state.measurePoints.length; i++) {
+                    ctx.lineTo(state.measurePoints[i].x, state.measurePoints[i].y);
+                }
+                ctx.strokeStyle = '#ffd93d';
+                ctx.lineWidth = state.lineWidth;
+                ctx.setLineDash([8, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Puntos de medición
+                state.measurePoints.forEach((p, i) => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, state.pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffd93d';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(i + 1, p.x + 10, p.y - 10);
+                });
+
+                // Mostrar distancia
+                if (state.measurePoints.length > 1) {
+                    const totalDist = calculateTotalDistance(state.measurePoints);
+                    const last = state.measurePoints[state.measurePoints.length - 1];
+                    const prev = state.measurePoints[state.measurePoints.length - 2];
+                    const midX = (last.x + prev.x) / 2;
+                    const midY = (last.y + prev.y) / 2 - 15;
+                    
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.font = 'bold 14px Arial';
+                    const segmentDist = Math.sqrt(
+                        Math.pow(last.x - prev.x, 2) + 
+                        Math.pow(last.y - prev.y, 2)
+                    );
+                    const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+                    const unit = document.getElementById('scaleUnit').value;
+                    ctx.fillText(
+                        `${segmentDist.toFixed(1)} px (${(segmentDist / scale).toFixed(2)} ${unit})`, 
+                        midX - 30, midY
+                    );
+                }
+
+                // Distancia total
+                if (state.measurePoints.length > 1) {
+                    const totalDist = calculateTotalDistance(state.measurePoints);
+                    const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+                    const unit = document.getElementById('scaleUnit').value;
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.fillText(
+                        `Total: ${totalDist.toFixed(1)} px (${(totalDist / scale).toFixed(2)} ${unit})`, 
+                        20, 30
+                    );
+                }
+            }
+
+            // Dibujar polígono
+            if (state.points.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(state.points[0].x, state.points[0].y);
+                for (let i = 1; i < state.points.length; i++) {
+                    ctx.lineTo(state.points[i].x, state.points[i].y);
+                }
+                if (state.isClosed && state.points.length > 2) {
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(100, 255, 218, 0.1)';
+                    ctx.fill();
+                    ctx.strokeStyle = '#64ffda';
+                    ctx.lineWidth = state.lineWidth;
+                    ctx.stroke();
+                } else {
+                    ctx.strokeStyle = 'rgba(100, 255, 218, 0.6)';
+                    ctx.lineWidth = state.lineWidth;
+                    ctx.stroke();
+                }
+
+                state.points.forEach((p, i) => {
+                    const isSelected = (i === state.selectedIndex && state.mode === 'edit');
+                    const baseSize = state.pointSize;
+                    const radius = isSelected ? baseSize + 3 : baseSize;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
+                    if (isSelected) {
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.shadowColor = '#ffd93d';
+                        ctx.shadowBlur = 15;
+                    } else {
+                        ctx.fillStyle = '#64ffda';
+                        ctx.shadowBlur = 0;
+                    }
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.fillStyle = '#e8edf5';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(i + 1, p.x + 10, p.y - 10);
+                });
+            }
+
+            if (state.isClosed && state.points.length > 2) {
+                const centroid = calculateCentroid(state.points);
+                if (centroid) {
+                    ctx.beginPath();
+                    ctx.arc(centroid.x, centroid.y, state.pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ff6b6b';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText('CG', centroid.x + 12, centroid.y - 8);
+                }
+            }
+        }
+
+        // ============ MANEJO DE EVENTOS ============
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        canvas.addEventListener('mousemove', function(e) {
+            const pos = getMousePos(e);
+            document.getElementById('mouseCoords').textContent = 
+                `(${Math.round(pos.x)}, ${Math.round(pos.y)})`;
+
+            if (state.mode === 'edit' && state.isDragging) {
+                state.points[state.dragIndex] = pos;
+                draw();
+                updateUI();
+            }
+        });
+
+        canvas.addEventListener('mousedown', function(e) {
+            const pos = getMousePos(e);
+
+            // Modo medición
+            if (state.mode === 'measure') {
+                state.measurePoints.push(pos);
+                draw();
+                updateMeasureUI();
+                document.getElementById('statusText').textContent = 
+                    `📏 Punto ${state.measurePoints.length} medido - Haz clic para continuar o cierra el polígono`;
+                return;
+            }
+
+            if (state.mode === 'edit') {
+                const threshold = 15;
+                let found = -1;
+                for (let i = 0; i < state.points.length; i++) {
+                    const dx = state.points[i].x - pos.x;
+                    const dy = state.points[i].y - pos.y;
+                    if (dx * dx + dy * dy < threshold * threshold) {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found >= 0) {
+                    state.selectedIndex = found;
+                    state.isDragging = true;
+                    state.dragIndex = found;
+                    draw();
+                    updateUI();
+                    return;
+                }
+                state.selectedIndex = -1;
+                draw();
+                updateUI();
+                return;
+            }
+
+            // Modo dibujo
+            if (state.isClosed) {
+                showToast('Polígono cerrado. Usa Reset o elimina el último vértice', 'error');
+                return;
+            }
+
+            state.points.push(pos);
+            state.selectedIndex = state.points.length - 1;
+            draw();
+            updateUI();
+            document.getElementById('statusText').textContent = 
+                `🔵 Vértice ${state.points.length} añadido - Haz clic para continuar`;
+        });
+
+        canvas.addEventListener('mouseup', function(e) {
+            state.isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', function() {
+            state.isDragging = false;
+        });
+
+        // ============ FUNCIONES DE MEDICIÓN ============
+        function calculateTotalDistance(points) {
+            if (points.length < 2) return 0;
+            let total = 0;
+            for (let i = 1; i < points.length; i++) {
+                const dx = points[i].x - points[i-1].x;
+                const dy = points[i].y - points[i-1].y;
+                total += Math.sqrt(dx * dx + dy * dy);
+            }
+            return total;
+        }
+
+        function startMeasure() {
+            state.measurePoints = [];
+            setMode('measure');
+            document.getElementById('measureResult').classList.remove('show');
+            showToast('📏 Haz clic en la imagen para medir distancias', 'info');
+        }
+
+        function clearMeasure() {
+            state.measurePoints = [];
+            document.getElementById('measureResult').classList.remove('show');
+            draw();
+            showToast('Medición limpia', 'success');
+        }
+
+        function updateMeasureUI() {
+            if (state.measurePoints.length < 2) {
+                document.getElementById('measureResult').classList.remove('show');
+                return;
+            }
+
+            const totalPx = calculateTotalDistance(state.measurePoints);
+            const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+            const unit = document.getElementById('scaleUnit').value;
+            
+            document.getElementById('measurePx').textContent = totalPx.toFixed(2);
+            document.getElementById('measureReal').textContent = `${(totalPx / scale).toFixed(2)} ${unit}`;
+            document.getElementById('measurePoints').textContent = state.measurePoints.length;
+            document.getElementById('calculatedScale').textContent = `1 px = ${scale.toFixed(4)} ${unit}`;
+            
+            document.getElementById('measureResult').classList.add('show');
+        }
+
+        function setScaleFromMeasure() {
+            if (state.measurePoints.length < 2) {
+                showToast('Primero mide una distancia en la imagen', 'error');
+                return;
+            }
+
+            const knownDist = parseFloat(document.getElementById('knownDistance').value);
+            if (!knownDist || knownDist <= 0) {
+                showToast('Ingresa una distancia real conocida', 'error');
+                return;
+            }
+
+            const measuredPx = calculateTotalDistance(state.measurePoints);
+            if (measuredPx < 1) {
+                showToast('La distancia medida es demasiado pequeña', 'error');
+                return;
+            }
+
+            const newScale = measuredPx / knownDist;
+            document.getElementById('scaleFactor').value = newScale.toFixed(4);
+            state.scale = newScale;
+            
+            // Actualizar unidad
+            const unit = document.getElementById('knownUnit').value;
+            document.getElementById('scaleUnit').value = unit;
+            
+            applyScale();
+            updateMeasureUI();
+            showToast(`✅ Escala calculada: 1 px = ${newScale.toFixed(4)} ${unit}`, 'success');
+        }
+
+        // ============ ACCIONES ============
+        function setMode(mode) {
+            state.mode = mode;
+            state.isDragging = false;
+            
+            document.getElementById('drawMode').classList.toggle('active', mode === 'draw');
+            document.getElementById('editMode').classList.toggle('active', mode === 'edit');
+            document.getElementById('measureMode').classList.toggle('measure-active', mode === 'measure');
+            
+            const statusText = mode === 'draw' ? '🔵 Modo Dibujo - Haz clic para añadir vértices' :
+                              mode === 'edit' ? '✋ Modo Edición - Arrastra los vértices para moverlos' :
+                              '📏 Modo Medición - Haz clic para medir distancias';
+            
+            document.getElementById('statusText').textContent = statusText;
+            canvas.style.cursor = mode === 'measure' ? 'crosshair' : mode === 'edit' ? 'grab' : 'crosshair';
+            draw();
+        }
+
+        function closePolygon() {
+            if (state.points.length < 3) {
+                showToast('Se necesitan al menos 3 vértices', 'error');
+                return;
+            }
+            state.isClosed = true;
+            draw();
+            updateUI();
+            calculateAll();
+            document.getElementById('statusText').textContent = '🔒 Polígono cerrado';
+            showToast('Polígono cerrado correctamente', 'success');
+        }
+
+        function deleteSelected() {
+            if (state.selectedIndex < 0 || state.selectedIndex >= state.points.length) {
+                showToast('Selecciona un vértice para eliminar', 'error');
+                return;
+            }
+            state.points.splice(state.selectedIndex, 1);
+            state.selectedIndex = -1;
+            state.isClosed = false;
+            draw();
+            updateUI();
+            clearResults();
+        }
+
+        function resetAll() {
+            state.points = [];
+            state.isClosed = false;
+            state.selectedIndex = -1;
+            state.isDragging = false;
+            state.measurePoints = [];
+            document.getElementById('measureResult').classList.remove('show');
+            draw();
+            updateUI();
+            clearResults();
+            document.getElementById('statusText').textContent = '🔵 Modo Dibujo - Haz clic para añadir vértices';
+            showToast('Todo reiniciado', 'success');
+        }
+
+        // ============ CÁLCULOS ============
+        function calculateArea(points) {
+            if (points.length < 3) return 0;
+            let area = 0;
+            const n = points.length;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += points[i].x * points[j].y;
+                area -= points[j].x * points[i].y;
+            }
+            return Math.abs(area) / 2;
+        }
+
+        function calculatePerimeter(points) {
+            if (points.length < 2) return 0;
+            let perimeter = 0;
+            const n = points.length;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                const dx = points[j].x - points[i].x;
+                const dy = points[j].y - points[i].y;
+                perimeter += Math.sqrt(dx * dx + dy * dy);
+            }
+            return perimeter;
+        }
+
+        function calculateCentroid(points) {
+            if (points.length < 3) return null;
+            let cx = 0, cy = 0, area = 0;
+            const n = points.length;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                const cross = points[i].x * points[j].y - points[j].x * points[i].y;
+                area += cross;
+                cx += (points[i].x + points[j].x) * cross;
+                cy += (points[i].y + points[j].y) * cross;
+            }
+            area = area / 2;
+            if (Math.abs(area) < 1e-10) return null;
+            cx = cx / (6 * area);
+            cy = cy / (6 * area);
+            return { x: cx, y: cy };
+        }
+
+        function calculateAll() {
+            if (state.points.length < 3 || !state.isClosed) {
+                showToast('Cierra el polígono primero', 'error');
+                return;
+            }
+
+            const area = calculateArea(state.points);
+            const perimeter = calculatePerimeter(state.points);
+            const centroid = calculateCentroid(state.points);
+            const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+            const unit = document.getElementById('scaleUnit').value;
+
+            document.getElementById('calcAreaPx').textContent = area.toFixed(4);
+            document.getElementById('calcAreaUnits').textContent = `${(area / (scale * scale)).toFixed(4)} ${unit}²`;
+            document.getElementById('calcPerimeter').textContent = perimeter.toFixed(4);
+            document.getElementById('calcCentroid').textContent = 
+                centroid ? `(${centroid.x.toFixed(2)}, ${centroid.y.toFixed(2)})` : 'N/A';
+
+            document.getElementById('resultsBox').classList.add('show');
+            showToast('Cálculos actualizados', 'success');
+        }
+
+        function calculateAreaOnly() {
+            if (state.points.length < 3 || !state.isClosed) {
+                showToast('Cierra el polígono primero', 'error');
+                return;
+            }
+            calculateAll();
+        }
+
+        function applyScale() {
+            const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+            state.scale = scale;
+            calculateAll();
+            updateMeasureUI();
+            showToast(`Escala aplicada: 1 px = ${scale} ${document.getElementById('scaleUnit').value}`, 'success');
+        }
+
+        // ============ UI ============
+        function updateUI() {
+            document.getElementById('vertexCount').textContent = `Vértices: ${state.points.length}`;
+            
+            document.getElementById('infoVertices').textContent = state.points.length;
+            if (state.isClosed && state.points.length > 2) {
+                const area = calculateArea(state.points);
+                document.getElementById('infoAreaPx').textContent = area.toFixed(2);
+                const scale = parseFloat(document.getElementById('scaleFactor').value) || 1;
+                const unit = document.getElementById('scaleUnit').value;
+                document.getElementById('infoAreaUnits').textContent = `${(area / (scale * scale)).toFixed(2)} ${unit}²`;
+                document.getElementById('infoPerimeter').textContent = calculatePerimeter(state.points).toFixed(2);
+            } else {
+                document.getElementById('infoAreaPx').textContent = '0';
+                document.getElementById('infoAreaUnits').textContent = '0';
+                document.getElementById('infoPerimeter').textContent = '0';
+            }
+
+            const list = document.getElementById('coordList');
+            if (state.points.length === 0) {
+                list.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px 0;">No hay vértices</div>';
+            } else {
+                list.innerHTML = state.points.map((p, i) => 
+                    `<div style="display:flex; justify-content:space-between; padding:2px 0; color:var(--text-secondary);">
+                        <span style="color:var(--text-primary);">P${i+1}</span>
+                        <span>(${p.x.toFixed(2)}, ${p.y.toFixed(2)})</span>
+                    </div>`
+                ).join('');
+            }
+        }
+
+        function copyCoords() {
+            if (state.points.length === 0) {
+                showToast('No hay coordenadas para copiar', 'error');
+                return;
+            }
+            const text = state.points.map((p, i) => 
+                `P${i+1}: (${p.x.toFixed(2)}, ${p.y.toFixed(2)})`
+            ).join('\n');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Coordenadas copiadas al portapapeles', 'success');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('Coordenadas copiadas al portapapeles', 'success');
+            });
+        }
+
+        function exportCoords() {
+            if (state.points.length === 0) {
+                showToast('No hay coordenadas para exportar', 'error');
+                return;
+            }
+            const data = {
+                points: state.points,
+                isClosed: state.isClosed,
+                scale: state.scale,
+                scaleUnit: document.getElementById('scaleUnit').value,
+                lineWidth: state.lineWidth,
+                pointSize: state.pointSize,
+                timestamp: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `poligono_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Datos exportados', 'success');
+        }
+
+        function importCoords() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.points && Array.isArray(data.points)) {
+                        state.points = data.points;
+                        state.isClosed = data.isClosed || false;
+                        state.scale = data.scale || 1;
+                        document.getElementById('scaleFactor').value = state.scale;
+                        if (data.scaleUnit) {
+                            document.getElementById('scaleUnit').value = data.scaleUnit;
+                        }
+                        if (data.lineWidth) {
+                            state.lineWidth = data.lineWidth;
+                            document.getElementById('lineWidth').value = data.lineWidth;
+                        }
+                        if (data.pointSize) {
+                            state.pointSize = data.pointSize;
+                            document.getElementById('pointSize').value = data.pointSize;
+                        }
+                        draw();
+                        updateUI();
+                        if (state.isClosed) calculateAll();
+                        showToast('Datos importados correctamente', 'success');
+                    } else {
+                        showToast('Formato de archivo inválido', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error al leer el archivo', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function clearResults() {
+            document.getElementById('resultsBox').classList.remove('show');
+        }
+
+        // ============ TOAST ============
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============ INICIO ============
+        init();
+        setMode('draw');
+
+        document.getElementById('scaleFactor').addEventListener('change', applyScale);
+        document.getElementById('scaleUnit').addEventListener('change', applyScale);
+
+        // Controles de estilo
+        document.getElementById('lineWidth').addEventListener('change', () => {
+            const opts = getStyleOptions();
+            state.lineWidth = opts.lineWidth;
+            draw();
+        });
+
+        document.getElementById('pointSize').addEventListener('change', () => {
+            const opts = getStyleOptions();
+            state.pointSize = opts.pointSize;
+            draw();
+        });
+    </script>
+</body>
+</html>
